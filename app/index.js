@@ -1,9 +1,20 @@
 const Koa = require('koa');
 const app = new Koa();
-const bodyparser = require('koa-bodyparser'); 
-app.use(bodyparser());
+const bodyparser = require('koa-bodyparser');
+const error = require('koa-json-error');
+const parameter = require('koa-parameter');
 const routing = require('./routes')
-
-routing(app) 
+app.use(error({
+	postFormat: (e, {
+		stack,
+		...rest
+	}) => process.env.NODE_ENV === 'production' ? rest : {
+		stack,
+		...rest
+	}
+}));
+app.use(bodyparser());
+app.use(parameter(app));
+routing(app)
 
 app.listen(3000)
